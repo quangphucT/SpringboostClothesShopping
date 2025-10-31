@@ -81,7 +81,7 @@ public class OrderService {
                 // Gọi PayOS thật
                 CreatePaymentLinkResponse response = payOSService.createPaymentLink(
                         orderOfCustomer.getId(),
-                        orderOfCustomer.getTotal_price(),
+                        total,
                         "Thanh toán đơn hàng #" + orderOfCustomer.getId()
                 );
 
@@ -93,9 +93,9 @@ public class OrderService {
         }
          paymentRepository.save(payment);
 
-        // 5️⃣ Dọn giỏ hàng
-        cart.getCartItems().clear();
-        cartRepository.save(cart);
+//        // 5️⃣ Dọn giỏ hàng
+//        cart.getCartItems().clear();
+//        cartRepository.save(cart);
 
         // 6️⃣ Tạo response trả về cho FE
         OrderResponse response = new OrderResponse();
@@ -116,6 +116,21 @@ public class OrderService {
             // Convert từ chuỗi trong webhook (vd: "PAID") sang enum
             PaymentStatus newStatus = PaymentStatus.valueOf(statusFromWebhook.toUpperCase());
             payment.setPaymentStatus(newStatus);
+             if(newStatus == PaymentStatus.PAID){
+                  CustomerProfile customerProfile = order.getCustomerProfile();
+                  if(customerProfile != null && customerProfile.getCart() != null){
+                       Cart cart = customerProfile.getCart();
+                       if(cart.getCartItems() != null && !cart.getCartItems().isEmpty()){
+                           cart.getCartItems().clear();
+                           cartRepository.save(cart);
+                           System.out.println("🛒 Đã dọn giỏ hàng của khách sau khi thanh toán thành công.");
+                       }else {
+                           System.out.println("🛒 Giỏ hàng đã trống, không cần dọn.");
+                       }
+                  }else {
+                      System.out.println("⚠️ Không tìm thấy cart của khách hàng.");
+                  }
+             }
 
             orderOfCustomerRepository.save(order);
             System.out.println("✅ Đơn hàng " + orderId + " cập nhật paymentStatus: " + newStatus);

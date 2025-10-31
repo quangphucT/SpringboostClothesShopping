@@ -1,7 +1,7 @@
 package com.example.demo.api.for_authentication;
 import com.example.demo.model.for_account.*;
 import com.example.demo.service.for_authen.AuthenticationService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +13,11 @@ import java.util.Map;
 @RequestMapping("/api/auth/")
 @CrossOrigin("*")
 @SecurityRequirement(name = "api")
+
 public class AuthenticationAPI {
     @Autowired
     AuthenticationService authenticationService;
+
     @PostMapping("sign-up")
     public ResponseEntity createNewAccount(@Valid  @RequestBody SignUpRequest signUpRequest) {
         SignUpResponse newAccount = authenticationService.createNewAccount(signUpRequest);
@@ -24,7 +26,6 @@ public class AuthenticationAPI {
         newAcc.put("data", newAccount);
         return ResponseEntity.ok(newAcc);
     }
-
 
     @PostMapping("verify-otp")
     public ResponseEntity verifyOtp(@RequestBody VerifyOtpRequest verifyOtpRequest) {
